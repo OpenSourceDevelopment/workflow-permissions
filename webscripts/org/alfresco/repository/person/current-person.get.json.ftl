@@ -1,6 +1,8 @@
-<#import "person.lib.ftl" as personLib/>
-<#if groups??>
-	<@personLib.personGroupsJSON person=person groups=groups capabilities=capabilities immutability=immutability />
-<#else>
-	<@personLib.personCapJSON person=person capabilities=capabilities />
-</#if>
+{
+    "userName": "${userName}",
+    "groups": [
+    <#list groups as group>
+        "${group.properties.authorityName}" <#if group_has_next>,</#if>
+    </#list>
+    ]
+}
