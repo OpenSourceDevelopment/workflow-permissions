@@ -116,15 +116,12 @@ function getWorkflowDefinitionsOfCurrentUser()
       {
          for (var i = 0; i < permissionDefinitions.size(); i++)
          {
-            definition = permissionDefinitions.get(i).attributes['definition'];
-
-            if (definition == workflowDefinition.name)
+            if (permissionDefinitions.get(i).attributes['definition'] == workflowDefinition.name)
             {
                authority = permissionDefinitions.get(i).attributes['authority'];
 
-               if (authority == person.userName)
-               {
-                  workflowDefinitionsResult.push(workflowDefinition);
+               if (authority == person.userName || person.groups.indexOf(authority) > -1) {
+                  workflowDefinitionsResult.push(workflowDefinition)
                }
             }
          }
