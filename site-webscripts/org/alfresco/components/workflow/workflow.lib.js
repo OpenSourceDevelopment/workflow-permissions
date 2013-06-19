@@ -97,31 +97,61 @@ function getSiteUrl(relativeURL, siteId)
    return site_url;
 }
 
+function resolveAuthorities(authorities) {
+   var authorityResult = {
+      "user": new Array(),
+      "group": new Array()
+   };
+
+   var childAuthorities = authorities.children;
+
+   for (var i = 0; i < childAuthorities.size(); i++)
+   {
+      switch(childAuthorities.get(i).attributes["type"])
+      {
+         case "user": authorityResult.user.push(childAuthorities.get(i).value); break;
+         case "group": authorityResult.group.push(childAuthorities.get(i).value); break;
+      }
+   }
+
+   return authorityResult;
+}
+
 function getWorkflowDefinitionsOfCurrentUser()
 {
    var person = doGetCall("/api/people/current");
    var workflowDefinitions = getWorkflowDefinitions();
    var workflowDefinitionsResult = new Array(workflowDefinitions.length);
+   var workflowConfig = config.scoped["Workflow"];
 
-   if (person.userName == 'admin')
+   if (person.userName == 'admin' || workflowConfig["permission-workflows"] == undefined)
    {
       workflowDefinitionsResult = workflowDefinitions;
    }
    else
    {
-      var permissionDefinitions = config.scoped['Workflow']['permission-definitions'].getChildren('permission-definition');
-      var authority = null, definition = null;
+      var permissionDefinitions = workflowConfig["permission-workflows"].getChildren("permission-workflow"), authorities = null;
 
       for each(var workflowDefinition in workflowDefinitions)
       {
          for (var i = 0; i < permissionDefinitions.size(); i++)
          {
-            if (permissionDefinitions.get(i).attributes['definition'] == workflowDefinition.name)
+            if (permissionDefinitions.get(i).attributes["name"] == workflowDefinition.name)
             {
-               authority = permissionDefinitions.get(i).attributes['authority'];
+               authorities = resolveAuthorities(permissionDefinitions.get(i).getChild('authorities'));
 
-               if (authority == person.userName || person.groups.indexOf(authority) > -1) {
-                  workflowDefinitionsResult.push(workflowDefinition)
+               if (authorities.user.indexOf(person.userName)) {
+                  workflowDefinitionsResult.push(workflowDefinition);
+               }
+               else
+               {
+                  for (var i = 0; i < person.groups.length; i++)
+                  {
+                     if (authorities.group.indexOf(person.groups[i]) > -1)
+                     {
+                        workflowDefinitionsResult.push(workflowDefinition);
+                     }
+                  }
                }
             }
          }

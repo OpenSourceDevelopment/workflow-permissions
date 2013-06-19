@@ -49,11 +49,14 @@
       </remote>
    </config>
 
-   <!-- This is sample configuration by define like this -->
    <config evaluator="string-compare" condition="Workflow" replace="true">
-       <permission-definitions>
-           <permission-definition definition="activiti$activitiAdhoc" authority="thanabodee" />
-       </permission-definitions>
-   </config>
-
+        <permission-workflows>
+            <permission-workflow name="activiti$activitiAdhoc">
+                <authorities>
+                    <authority type="user">thanabodee</authority>
+                    <authority type="group">GROUP_testPermission</authority>
+                </authorities>
+            </permission-workflow>
+        </permission-workflows>
+    </config>
 </alfresco-config>
