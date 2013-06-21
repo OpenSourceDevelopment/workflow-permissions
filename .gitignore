@@ -3,3 +3,8 @@
 
 # ignore maven build folder
 target/
+
+# ignore eclipse IDE project
+.settings/
+.classpath
+.project
