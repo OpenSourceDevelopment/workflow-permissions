@@ -98,66 +98,74 @@ function getSiteUrl(relativeURL, siteId)
 }
 
 function resolveAuthorities(authorities) {
-   var authorityResult = {
-      "user": new Array(),
-      "group": new Array()
-   };
+    var authorityResult = {
+        "user": new Array(),
+        "group": new Array()
+    };
+    var childAuthorities = authorities.children;
 
-   var childAuthorities = authorities.children;
+    for (var i = 0; i < childAuthorities.size(); i++)
+    {
+        switch(childAuthorities.get(i).attributes["type"])
+        {
+            case "user": authorityResult.user.push(childAuthorities.get(i).value); break;
+            case "group": authorityResult.group.push(childAuthorities.get(i).value); break;
+        }
+    }
 
-   for (var i = 0; i < childAuthorities.size(); i++)
-   {
-      switch(childAuthorities.get(i).attributes["type"])
-      {
-         case "user": authorityResult.user.push(childAuthorities.get(i).value); break;
-         case "group": authorityResult.group.push(childAuthorities.get(i).value); break;
-      }
-   }
-
-   return authorityResult;
+    return authorityResult;
 }
 
 function getWorkflowDefinitionsOfCurrentUser()
 {
-   var person = doGetCall("/api/people/current");
-   var workflowDefinitions = getWorkflowDefinitions();
-   var workflowDefinitionsResult = new Array(workflowDefinitions.length);
-   var workflowConfig = config.scoped["Workflow"];
+    var person = doGetCall("/api/people/current");
+    var workflowDefinitions = getWorkflowDefinitions();
+    var workflowConfig = config.scoped["Workflow"];
 
-   if (person.userName == 'admin' || workflowConfig["permission-workflows"] == undefined)
-   {
-      workflowDefinitionsResult = workflowDefinitions;
-   }
-   else
-   {
-      var permissionDefinitions = workflowConfig["permission-workflows"].getChildren("permission-workflow"), authorities = null;
+    var filterCondition = {
+        "true": function returnDefinitions(workfowConfig, workflowDefinitions)
+        {
+            return workflowDefinitions;
+        },
+        "false": function filterBeforeReturnDefinitions(workflowConfig, workflowDefinitions)
+        {
+            var permissionDefinitions = workflowConfig["permission-workflows"].getChildren("permission-workflow"), authorities = null;
+            var workflowDefinitionsResult = new Array(workflowDefinitions.length);
 
-      for each(var workflowDefinition in workflowDefinitions)
-      {
-         for (var i = 0; i < permissionDefinitions.size(); i++)
-         {
-            if (permissionDefinitions.get(i).attributes["name"] == workflowDefinition.name)
+            for each(var workflowDefinition in workflowDefinitions)
             {
-               authorities = resolveAuthorities(permissionDefinitions.get(i).getChild('authorities'));
+                // It's ArrayList java class use it like this (or maybe change to iterator for readable or avoid infinite loop).
+                var permissionDefinitionIterator = permissionDefinitions.iterator();
+                while (permissionDefinitionIterator.hasNext())
+                {
+                    var permissionDefinition = permissionDefinitionIterator.next()
+                    if (permissionDefinition.attributes["name"] == workflowDefinition.name)
+                    {
+                        authorities = resolveAuthorities(permissionDefinition.getChild('authorities'));
 
-               if (authorities.user.indexOf(person.userName)) {
-                  workflowDefinitionsResult.push(workflowDefinition);
-               }
-               else
-               {
-                  for (var i = 0; i < person.groups.length; i++)
-                  {
-                     if (authorities.group.indexOf(person.groups[i]) > -1)
-                     {
-                        workflowDefinitionsResult.push(workflowDefinition);
-                     }
-                  }
-               }
+                        if (authorities.user.indexOf(person.userName))
+                        {
+                            workflowDefinitionsResult.push(workflowDefinition);
+                        }
+                        else
+                        {
+                            for each(var group in person.groups)
+                            {
+                                if (authorities.group.indexOf(group) > -1)
+                                {
+                                    workflowDefinitionsResult.push(workflowDefinition);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             }
-         }
-      }
-   }
 
-   return workflowDefinitionsResult;
+            return workflowDefinitionsResult;
+        }
+    };
+
+    return filterCondition[((person.userName == 'admin') || (workflowConfig["permission-workflows"] == undefined))](workflowConfig, workflowDefinitions);
 }
 
