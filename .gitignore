@@ -1,2 +1,5 @@
 *.swp
 .DS_Store
+
+# ignore maven build folder
+target/
