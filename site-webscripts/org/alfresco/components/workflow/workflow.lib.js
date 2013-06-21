@@ -139,14 +139,12 @@ function getWorkflowDefinitionsOfCurrentUser()
             var defaultAllow = (permissionWorkflows.hasAttribute("default") && permissionWorkflows.attributes["default"] == "allow") ? true : false;
             var workflowDefinitionsResult = new Array(workflowDefinitions.length);
 
-
-            for each(var workflowDefinition in workflowDefinitions)
+            var permissionDefinitionIterator = permissionDefinitions.iterator();
+            while (permissionDefinitionIterator.hasNext())
             {
-                // It's ArrayList java class use it like this (or maybe change to iterator for readable or avoid infinite loop).
-                var permissionDefinitionIterator = permissionDefinitions.iterator();
-                while (permissionDefinitionIterator.hasNext())
+                var permissionDefinition = permissionDefinitionIterator.next();
+                for each(var workflowDefinition in workflowDefinitions)
                 {
-                    var permissionDefinition = permissionDefinitionIterator.next()
                     if (permissionDefinition.attributes["name"] == workflowDefinition.name)
                     {
                         authorities = resolveAuthorities(permissionDefinition.getChild('authorities'));
