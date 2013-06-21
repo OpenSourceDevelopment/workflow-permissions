@@ -50,7 +50,7 @@
    </config>
 
    <config evaluator="string-compare" condition="Workflow" replace="true">
-        <permission-workflows>
+        <permission-workflows default="allow">
             <permission-workflow name="activiti$activitiAdhoc">
                 <authorities>
                     <authority type="user">thanabodee</authority>

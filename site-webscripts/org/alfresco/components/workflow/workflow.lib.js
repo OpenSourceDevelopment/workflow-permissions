@@ -102,14 +102,18 @@ function resolveAuthorities(authorities) {
         "user": new Array(),
         "group": new Array()
     };
-    var childAuthorities = authorities.children;
 
-    for (var i = 0; i < childAuthorities.size(); i++)
+    if (authorities.children.size() != 0)
     {
-        switch(childAuthorities.get(i).attributes["type"])
+        var childAuthorities = authorities.children.iterator();
+        while (childAuthorities.hasNext())
         {
-            case "user": authorityResult.user.push(childAuthorities.get(i).value); break;
-            case "group": authorityResult.group.push(childAuthorities.get(i).value); break;
+            var childAuthority = childAuthorities.next();
+            switch(childAuthority.attributes["type"])
+            {
+                case "user": authorityResult.user.push(childAuthority.value); break;
+                case "group": authorityResult.group.push(childAuthority.value); break;
+            }
         }
     }
 
@@ -129,8 +133,12 @@ function getWorkflowDefinitionsOfCurrentUser()
         },
         "false": function filterBeforeReturnDefinitions(workflowConfig, workflowDefinitions)
         {
-            var permissionDefinitions = workflowConfig["permission-workflows"].getChildren("permission-workflow"), authorities = null;
+            var permissionWorkflows = workflowConfig["permission-workflows"];
+            var permissionDefinitions =  permissionWorkflows.getChildren("permission-workflow"), authorities = null;
+            // for #4
+            var defaultAllow = (permissionWorkflows.hasAttribute("default") && permissionWorkflows.attributes["default"] == "allow") ? true : false;
             var workflowDefinitionsResult = new Array(workflowDefinitions.length);
+
 
             for each(var workflowDefinition in workflowDefinitions)
             {
@@ -142,6 +150,11 @@ function getWorkflowDefinitionsOfCurrentUser()
                     if (permissionDefinition.attributes["name"] == workflowDefinition.name)
                     {
                         authorities = resolveAuthorities(permissionDefinition.getChild('authorities'));
+                        // check authority not define
+                        if (authorities.user.length == 0 && authorities.group.length == 0)
+                        {
+                            continue;
+                        }
 
                         if (authorities.user.indexOf(person.userName))
                         {
@@ -158,6 +171,10 @@ function getWorkflowDefinitionsOfCurrentUser()
                                 }
                             }
                         }
+                    } else {
+                        if (defaultAllow) {
+                            workflowDefinitionsResult.push(workflowDefinition);
+                        }
                     }
                 }
             }
@@ -168,4 +185,3 @@ function getWorkflowDefinitionsOfCurrentUser()
 
     return filterCondition[((person.userName == 'admin') || (workflowConfig["permission-workflows"] == undefined))](workflowConfig, workflowDefinitions);
 }
-
