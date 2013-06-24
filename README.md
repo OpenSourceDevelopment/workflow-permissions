@@ -28,3 +28,9 @@ Building
 mvn package
 ```
 After building you can find AMP package in grant-permissions-repo and grant-permissions-share. Install it by Alfresco Module Management Tools (MMT)
+
+Requirement
+=====
+* Alfresco 4.2.c
+* JDK 1.7
+* Maven 3
