@@ -1,9 +1,7 @@
 Workflow Permissions
 ====================
-
 By default Alfresco cannot manage users or groups to start the advanced workflow. 
-
-Workflow permissions provide the way to manage permission of advanced workflow by configuration in share-config-custom.xml 
+Workflow permissions provide the way to manage permission of advanced workflow by configuration in share-config-custom.xml
 
 Sample
 ======
@@ -23,3 +21,10 @@ Sample
     </config>
 </alfresco-config>
 ```
+Building
+=====
+
+```bash
+mvn package
+```
+After building you can find AMP package in grant-permissions-repo and grant-permissions-share. Install it by Alfresco Module Management Tools (MMT)
