@@ -137,7 +137,7 @@ function getWorkflowDefinitionsOfCurrentUser()
             var permissionDefinitions =  permissionWorkflows.getChildren("permission-workflow"), authorities = null;
             // for #4
             var defaultAllow = (permissionWorkflows.hasAttribute("default") && permissionWorkflows.attributes["default"] == "allow") ? true : false;
-            var workflowDefinitionsResult = new Array(workflowDefinitions.length);
+            var workflowDefinitionsResult = new Array();
 
             var permissionDefinitionIterator = permissionDefinitions.iterator();
             while (permissionDefinitionIterator.hasNext())
@@ -154,7 +154,7 @@ function getWorkflowDefinitionsOfCurrentUser()
                             continue;
                         }
 
-                        if (authorities.user.indexOf(person.userName))
+                        if (authorities.user.indexOf(person.userName) > -1)
                         {
                             workflowDefinitionsResult.push(workflowDefinition);
                         }
