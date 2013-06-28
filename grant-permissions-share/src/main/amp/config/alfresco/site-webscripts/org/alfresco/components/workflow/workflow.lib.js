@@ -99,8 +99,8 @@ function getSiteUrl(relativeURL, siteId)
 
 function resolveAuthorities(authorities) {
     var authorityResult = {
-        "user": new Array(),
-        "group": new Array()
+        "user": new java.util.ArrayList(),
+        "group": new java.util.ArrayList()
     };
 
     if (authorities.children.size() != 0)
@@ -111,8 +111,8 @@ function resolveAuthorities(authorities) {
             var childAuthority = childAuthorities.next();
             switch(childAuthority.attributes["type"])
             {
-                case "user": authorityResult.user.push(childAuthority.value); break;
-                case "group": authorityResult.group.push(childAuthority.value); break;
+                case "user": authorityResult.user.add(childAuthority.value); break;
+                case "group": authorityResult.group.add(childAuthority.value); break;
             }
         }
     }
@@ -154,7 +154,7 @@ function getWorkflowDefinitionsOfCurrentUser()
                             continue;
                         }
 
-                        if (authorities.user.indexOf(person.userName) > -1)
+                        if (authorities.user.contains(person.userName))
                         {
                             workflowDefinitionsResult.push(workflowDefinition);
                         }
@@ -162,7 +162,7 @@ function getWorkflowDefinitionsOfCurrentUser()
                         {
                             for each(var group in person.groups)
                             {
-                                if (authorities.group.indexOf(group) > -1)
+                                if (authorities.group.contains(group))
                                 {
                                     workflowDefinitionsResult.push(workflowDefinition);
                                     break;
