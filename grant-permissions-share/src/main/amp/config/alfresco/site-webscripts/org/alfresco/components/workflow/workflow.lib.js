@@ -43,7 +43,7 @@ function getWorkflowDefinitions()
    if (result.status == 200)
    {
       var workflows = eval('(' + result + ')').data;
-      workflows.sort(sortByTitle);
+      // workflows.sort(sortByTitle);
       return workflows;
    }
    return [];
@@ -137,7 +137,7 @@ function getWorkflowDefinitionsOfCurrentUser()
             var permissionDefinitions =  permissionWorkflows.getChildren("permission-workflow"), authorities = null;
             // for #4
             var defaultAllow = (permissionWorkflows.hasAttribute("default") && permissionWorkflows.attributes["default"] == "allow") ? true : false;
-            var workflowDefinitionsResult = new Array();
+            var workflowDefinitionsResult = new java.util.HashSet();
 
             var permissionDefinitionIterator = permissionDefinitions.iterator();
             while (permissionDefinitionIterator.hasNext())
@@ -156,7 +156,7 @@ function getWorkflowDefinitionsOfCurrentUser()
 
                         if (authorities.user.contains(person.userName))
                         {
-                            workflowDefinitionsResult.push(workflowDefinition);
+                            workflowDefinitionsResult.add(workflowDefinition);
                         }
                         else
                         {
@@ -164,20 +164,20 @@ function getWorkflowDefinitionsOfCurrentUser()
                             {
                                 if (authorities.group.contains(group))
                                 {
-                                    workflowDefinitionsResult.push(workflowDefinition);
+                                    workflowDefinitionsResult.add(workflowDefinition);
                                     break;
                                 }
                             }
                         }
                     } else {
                         if (defaultAllow) {
-                            workflowDefinitionsResult.push(workflowDefinition);
+                            workflowDefinitionsResult.add(workflowDefinition);
                         }
                     }
                 }
             }
 
-            return workflowDefinitionsResult;
+            return workflowDefinitionsResult.toArray().sort(sortByTitle);
         }
     };
 
